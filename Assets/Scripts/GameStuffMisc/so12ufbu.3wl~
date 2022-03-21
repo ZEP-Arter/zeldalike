@@ -1,0 +1,57 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Room : MonoBehaviour
+{
+    protected Enemy[] m_enemies;
+    protected Breakable[] m_breakables;
+
+    protected virtual void Awake()        // I'm using awake because Start() wasn't getting called
+    {
+        m_enemies = GetComponentsInChildren<Enemy>(true);
+        m_breakables = GetComponentsInChildren<Breakable>(true);
+    }
+
+    public void EnemiesAreAllDead()
+    {
+        foreach (Enemy enemy in m_enemies)
+        {
+            if(enemy.gameObject.activeInHierarchy)
+            {
+                return;
+            }
+        }
+        AllEnemiesDeadFunction();
+    }
+
+
+    protected virtual void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && !other.isTrigger)
+        {
+            foreach (Enemy enemy in m_enemies)
+                ChangeActivation(enemy, true);
+
+            foreach (Breakable breakable in m_breakables)
+                ChangeActivation(breakable, true);
+        }
+    }
+
+    protected virtual void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && !other.isTrigger)
+        {
+            foreach (Enemy enemy in m_enemies)
+                ChangeActivation(enemy, false);
+
+            foreach (Breakable breakable in m_breakables)
+                ChangeActivation(breakable, false);
+        }
+    }
+
+    private void ChangeActivation(Component component, bool activate)
+    {
+        component.gameObject.SetActive(activate);
+    }
+}
